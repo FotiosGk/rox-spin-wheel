@@ -4,67 +4,191 @@
   <meta charset="UTF-8" />
   <title>Spin the roX Fun-Fact Wheel!</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 2em; }
-    #wheel { 
-      width: 300px; height: 300px; margin: auto; border: 8px solid #4f46e5; 
-      border-radius: 50%; position: relative; overflow: hidden;
-      transition: transform 3s ease-out;
-    }
-    .segment {
-      position: absolute; width: 50%; height: 50%; top: 50%; left: 50%;
-      transform-origin: 0 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8em; pointer-events: none;
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
+      background: #f4f4fa;
     }
     #pointer {
-      width: 0; height: 0; border-left: 12px solid transparent;
-      border-right:12px solid transparent; border-bottom: 24px solid #dc2626;
-      position: relative; top: -12px; margin: auto;
+      width: 0; height: 0;
+      border-left: 16px solid transparent;
+      border-right:16px solid transparent;
+      border-bottom: 32px solid #dc2626;
+      position: relative; top: 6px; left: 0;
+      margin: auto;
+      z-index: 2;
     }
-    button { margin-top: 1em; padding: 0.5em 1em; background:#4f46e5; color:#fff;
-             border:none; border-radius:9999px; cursor:pointer; }
-    #fact { margin-top:1em; font-weight:bold; }
+    #wheel {
+      display: block;
+      margin: 30px auto 0 auto;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 28px #d1d5db;
+    }
+    button {
+      margin-top: 2em;
+      padding: 0.9em 1.6em;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 9999px;
+      font-size: 1.1em;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #bdb7f3;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #3730a3;
+    }
+    #fact {
+      margin-top: 2em;
+      font-weight: bold;
+      font-size: 1.2em;
+      min-height: 2em;
+    }
   </style>
 </head>
 <body>
   <h1>Spin the roX Fun-Fact Wheel!</h1>
   <div id="pointer"></div>
-  <div id="wheel"></div>
+  <canvas id="wheel" width="400" height="400"></canvas>
   <button id="spin">Spin</button>
   <div id="fact"></div>
 
   <script>
+    // Fun facts array (10 facts, one per segment)
     const facts = [
       'roX originally stood for "RNA on X" – catchy, right?',
       'Without roX2, male flies feel X-tra lonely.',
       'CUT&RUN can sometimes be a bit too cut-throat.',
       'MSL2 loves ChIP more than CUT&RUN (sometimes).',
       'Some roX mutants save the day better than others!',
-      'Stay calm and roX on – science rocks!'
+      'Stay calm and roX on – science rocks!',
+      'Dosage compensation is nature’s balancing act!',
+      'roX1 and roX2 make a great team on the X chromosome.',
+      'SXL and MSL—two ways flies break the rules!',
+      'Spinning the wheel is more fun with fun facts!'
     ];
-    const wheel = document.getElementById('wheel');
-    const factDiv = document.getElementById('fact');
-    const segAngle = 360 / facts.length;
+
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const numSegments = facts.length;
+    const centerX = 200, centerY = 200, radius = 180;
+    const segAngle = 2 * Math.PI / numSegments;
+    const colors = [];
+
+    // Generate vibrant, colorblind-friendly, warm colors for each segment
+    function generateWarmColor(i) {
+      // Warm hues: red, orange, yellow (0–60deg), rotate a bit for variety
+      const hue = (i * (60 / numSegments) + Math.random() * 15) % 60;
+      return `hsl(${hue}, 90%, 62%)`;
+    }
+    for (let i = 0; i < numSegments; i++) {
+      colors.push(generateWarmColor(i));
+    }
+
+    // Draw the wheel
+    function drawWheel(rotation = 0) {
+      ctx.clearRect(0, 0, 400, 400);
+      for (let i = 0; i < numSegments; i++) {
+        // Pie slice
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, rotation + i * segAngle, rotation + (i + 1) * segAngle, false);
+        ctx.closePath();
+        ctx.fillStyle = colors[i];
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 3;
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw vertical text
+        ctx.translate(centerX, centerY);
+        ctx.rotate(rotation + (i + 0.5) * segAngle);
+
+        ctx.save(); // For vertical orientation
+        ctx.rotate(Math.PI / 2);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 15px sans-serif";
+
+        // Split the long fact into multiple lines if needed
+        const text = facts[i];
+        const maxLen = 20;
+        let lines = [];
+        if (text.length > maxLen) {
+          let parts = text.split(' ');
+          let line = '';
+          for (let word of parts) {
+            if ((line + word).length > maxLen) {
+              lines.push(line);
+              line = '';
+            }
+            line += word + ' ';
+          }
+          lines.push(line.trim());
+        } else {
+          lines = [text];
+        }
+
+        // Draw lines vertically centered
+        const lineHeight = 16;
+        const startY = -((lines.length - 1) / 2) * lineHeight;
+        for (let idx = 0; idx < lines.length; idx++) {
+          ctx.fillText(lines[idx], radius / 1.5, startY + idx * lineHeight);
+        }
+        ctx.restore();
+
+        ctx.restore();
+      }
+    }
+
+    // Animation and spin logic
+    let spinning = false;
     let currentRotation = 0;
 
-    // build segments
-    facts.forEach((txt, i) => {
-      const seg = document.createElement('div');
-      seg.className = 'segment';
-      seg.style.transform = `rotate(${i*segAngle}deg) translate(-50%, -100%)`;
-      seg.textContent = txt.slice(0, 15) + '…';
-      wheel.appendChild(seg);
-    });
+    function spinWheel() {
+      if (spinning) return;
+      spinning = true;
+      document.getElementById('fact').textContent = "";
 
-    document.getElementById('spin').onclick = () => {
-      const spins = Math.floor(Math.random()*5)+5; 
-      const index = Math.floor(Math.random()*facts.length);
-      const target = spins*360 + index*segAngle + segAngle/2;
-      wheel.style.transform = `rotate(${target}deg)`;
-      currentRotation = target;
-      factDiv.textContent = '';
-      setTimeout(() => factDiv.textContent = 'Fun Fact: ' + facts[index], 3000);
-    };
+      // Pick a random segment as the winner
+      const winner = Math.floor(Math.random() * numSegments);
+      // Spin at least 5 times + land on winner
+      const spins = Math.floor(Math.random() * 3) + 5;
+      const finalRotation = (spins * 2 * Math.PI) + ((numSegments - winner) * segAngle) - segAngle / 2;
+
+      const duration = 3000;
+      const start = performance.now();
+      const startRotation = currentRotation;
+
+      function animate(now) {
+        const elapsed = now - start;
+        const t = Math.min(elapsed / duration, 1);
+        // Ease out
+        const ease = 1 - Math.pow(1 - t, 3);
+        const angle = startRotation + (finalRotation - startRotation) * ease;
+        drawWheel(angle);
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          currentRotation = finalRotation % (2 * Math.PI);
+          spinning = false;
+          // Show fact
+          setTimeout(() => {
+            document.getElementById('fact').textContent = "Fun Fact: " + facts[winner];
+          }, 300);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    drawWheel();
+
+    document.getElementById('spin').onclick = spinWheel;
   </script>
 </body>
 </html>
