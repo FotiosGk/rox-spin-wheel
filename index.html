@@ -48,6 +48,10 @@
       font-weight: bold;
       font-size: 1.2em;
       min-height: 2em;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      white-space: pre-line;
     }
   </style>
 </head>
@@ -57,20 +61,149 @@
   <canvas id="wheel" width="400" height="400"></canvas>
   <button id="spin">Spin</button>
   <div id="fact"></div>
-
   <script>
-    const facts = [
-      'roX originally stood for "RNA on X" – catchy, right?',
-      'Without roX2, male flies feel X-tra lonely.',
-      'CUT&RUN can sometimes be a bit too cut-throat.',
-      'MSL2 loves ChIP more than CUT&RUN (sometimes).',
-      'Some roX mutants save the day better than others!',
-      'Stay calm and roX on – science rocks!',
-      'Dosage compensation is nature’s balancing act!',
-      'roX1 and roX2 make a great team on the X chromosome.',
-      'SXL and MSL—two ways flies break the rules!',
-      'Spinning the wheel is more fun with fun facts!'
+    // Full pool of 30 facts (replace/edit as needed)
+    const factPool = [
+      // Dosage Compensation in Drosophila
+      {
+        title: "X Marks the Spot",
+        description: "Male fruit flies double the activity of their single X chromosome to match females' two—talk about leveling the playing field!"
+      },
+      {
+        title: "MSL Squad Goals",
+        description: "The Male-Specific Lethal (MSL) complex is the ultimate team, boosting gene expression on the male X chromosome."
+      },
+      {
+        title: "roX Stars",
+        description: "roX1 and roX2 RNAs are the dynamic duo guiding the MSL complex to the X chromosome."
+      },
+      {
+        title: "Histone Remix",
+        description: "MSL complex adds acetyl groups to histone H4 at lysine 16, turning up the gene expression volume."
+      },
+      {
+        title: "Sex-Lethal Switch",
+        description: "The Sex-lethal gene ensures females don't form the MSL complex—gender-specific gene regulation at its finest."
+      },
+      {
+        title: "Chromosome Choreography",
+        description: "The MSL complex dances along the X chromosome, ensuring genes are expressed just right."
+      },
+      {
+        title: "Dosage Drama",
+        description: "Without proper dosage compensation, male flies face fatal consequences—balance is life!"
+      },
+      {
+        title: "Epigenetic Elegance",
+        description: "Dosage compensation showcases the power of epigenetics in regulating gene expression."
+      },
+      {
+        title: "Evolutionary Marvel",
+        description: "Drosophila's dosage compensation is a testament to evolutionary innovation."
+      },
+      {
+        title: "Genetic Symphony",
+        description: "The coordination between MSL proteins and roX RNAs creates a harmonious gene expression tune."
+      },
+      // Dosage Compensation Across Species
+      {
+        title: "Mammalian Mystery",
+        description: "In female mammals, one X chromosome is silenced to balance gene expression—a process called X-inactivation."
+      },
+      {
+        title: "C. elegans Strategy",
+        description: "Hermaphrodite worms halve the expression from both X chromosomes to match males' single X."
+      },
+      {
+        title: "Birds' Enigma",
+        description: "Birds have ZW sex chromosomes, but their dosage compensation mechanisms are still not fully understood."
+      },
+      {
+        title: "Butterfly Balance",
+        description: "Some butterflies double gene expression on the male's single X chromosome to achieve balance."
+      },
+      {
+        title: "Marsupial Method",
+        description: "In marsupials, the paternal X chromosome is always inactivated in females."
+      },
+      {
+        title: "Fishy Findings",
+        description: "Dosage compensation mechanisms in fish species vary widely and are still being studied."
+      },
+      {
+        title: "Random Acts",
+        description: "In humans, X-inactivation is typically random, but sometimes one X is preferentially inactivated—known as skewed X-inactivation."
+      },
+      {
+        title: "Turner Syndrome Insight",
+        description: "Individuals with Turner syndrome (XO) have only one X chromosome, leading to unique dosage compensation challenges."
+      },
+      {
+        title: "Klinefelter Complexity",
+        description: "Males with Klinefelter syndrome (XXY) have an extra X chromosome, and dosage compensation helps balance gene expression."
+      },
+      {
+        title: "Epigenetic Engineers",
+        description: "Across species, dosage compensation involves epigenetic modifications like DNA methylation and histone changes."
+      },
+      // Long Non-Coding RNAs (lncRNAs)
+      {
+        title: "Not So Junky",
+        description: "Once considered 'junk,' lncRNAs are now recognized as crucial regulators of gene expression."
+      },
+      {
+        title: "Guiding Lights",
+        description: "lncRNAs can guide proteins to specific DNA sites, influencing gene activity."
+      },
+      {
+        title: "Scaffold Builders",
+        description: "They act as scaffolds, bringing together multiple proteins to form functional complexes."
+      },
+      {
+        title: "Signal Senders",
+        description: "lncRNAs can act as molecular signals, turning genes on or off in response to various stimuli."
+      },
+      {
+        title: "Chromatin Remodelers",
+        description: "They play roles in modifying chromatin structure, impacting gene accessibility."
+      },
+      {
+        title: "Transcriptional Tuners",
+        description: "lncRNAs can enhance or repress transcription, fine-tuning gene expression levels."
+      },
+      {
+        title: "RNA Sponges",
+        description: "Some lncRNAs act as sponges, binding to and sequestering microRNAs, preventing them from repressing target mRNAs."
+      },
+      {
+        title: "Cell Fate Deciders",
+        description: "They influence cell differentiation, guiding stem cells to become specific cell types."
+      },
+      {
+        title: "Disease Links",
+        description: "Aberrant lncRNA expression is linked to various diseases, including cancers and neurological disorders."
+      },
+      {
+        title: "Therapeutic Targets",
+        description: "lncRNAs are emerging as potential targets for novel therapeutic interventions."
+      }
     ];
+
+    // Randomly select 10 unique facts for each page load
+    function getRandomFacts(pool, n) {
+      const facts = [];
+      const used = new Set();
+      while (facts.length < n) {
+        const idx = Math.floor(Math.random() * pool.length);
+        if (!used.has(idx)) {
+          facts.push(pool[idx]);
+          used.add(idx);
+        }
+      }
+      return facts;
+    }
+    // On each load, select 10
+    const facts = getRandomFacts(factPool, 10);
 
     const canvas = document.getElementById('wheel');
     const ctx = canvas.getContext('2d');
@@ -118,8 +251,8 @@
         ctx.fillStyle = "#fff";
         ctx.font = "bold 14px sans-serif";
 
-        // Split fact into lines if it's too long
-        const text = facts[i];
+        // Split title into lines if too long
+        const text = facts[i].title;
         const maxLen = 22;
         let lines = [];
         if (text.length > maxLen) {
@@ -143,7 +276,7 @@
         for (let idx = 0; idx < lines.length; idx++) {
           ctx.save();
           ctx.translate(40, startY + idx * lineHeight); // 40px from center
-          ctx.rotate(0); // No extra rotation needed
+          ctx.rotate(0);
           ctx.fillText(lines[idx], 0, 0);
           ctx.restore();
         }
@@ -182,9 +315,10 @@
         } else {
           currentRotation = finalRotation % (2 * Math.PI);
           spinning = false;
-          // Show fact
+          // Show full description
           setTimeout(() => {
-            document.getElementById('fact').textContent = "Fun Fact: " + facts[winner];
+            document.getElementById('fact').textContent =
+              facts[winner].title + ":\n" + facts[winner].description;
           }, 300);
         }
       }
