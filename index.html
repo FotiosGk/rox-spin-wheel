@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Spin the roX Fun-Fact Wheel!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
       font-family: sans-serif;
@@ -27,6 +28,10 @@
       background: #fff;
       border-radius: 50%;
       box-shadow: 0 0 28px #d1d5db;
+      width: 90vw;
+      max-width: 400px;
+      height: auto;
+      touch-action: none;
     }
     button {
       margin-top: 2em;
@@ -40,156 +45,75 @@
       box-shadow: 0 2px 8px #bdb7f3;
       transition: background 0.2s;
     }
-    button:hover {
+    button:hover, button:active {
       background: #3730a3;
     }
     #fact {
       margin-top: 2em;
       font-weight: bold;
-      font-size: 1.2em;
+      font-size: 1.15em;
       min-height: 2em;
-      max-width: 600px;
+      max-width: 96vw;
       margin-left: auto;
       margin-right: auto;
       white-space: pre-line;
+    }
+    @media (max-width: 500px) {
+      body {
+        padding: 0.5em;
+      }
+      #fact {
+        font-size: 1em;
+      }
+      button {
+        font-size: 1em;
+        padding: 0.7em 1.1em;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Spin the roX Fun-Fact Wheel!</h1>
   <div id="pointer"></div>
-  <canvas id="wheel" width="400" height="400"></canvas>
+  <canvas id="wheel"></canvas>
   <button id="spin">Spin</button>
   <div id="fact"></div>
   <script>
-    // Full pool of 30 facts (replace/edit as needed)
+    // 30 fun facts pool (You can edit or reorder these as needed)
     const factPool = [
-      // Dosage Compensation in Drosophila
-      {
-        title: "X Marks the Spot",
-        description: "Male fruit flies double the activity of their single X chromosome to match females' two Xs—talk about leveling the playing field!"
-      },
-      {
-        title: "MSL Squad Goals",
-        description: "The Male-Specific Lethal (MSL) complex is the ultimate team, boosting gene expression on the male X chromosome, in flies."
-      },
-      {
-        title: "roX Stars",
-        description: "roX1 and roX2 RNAs are the dynamic duo guiding the MSL complex to the X chromosome."
-      },
-      {
-        title: "Histone Remix",
-        description: "MSL complex adds acetyl groups to histone H4 at lysine 16, turning up the gene expression volume."
-      },
-      {
-        title: "Sex-Lethal Switch",
-        description: "The Sex-lethal gene ensures females don't form the MSL complex—gender-specific gene regulation at its finest."
-      },
-      {
-        title: "Chromosome Choreography",
-        description: "The MSL complex dances along the X chromosome, ensuring genes are expressed just right."
-      },
-      {
-        title: "Dosage Drama",
-        description: "Without proper dosage compensation, male flies face fatal consequences—balance is life!"
-      },
-      {
-        title: "Epigenetic Elegance",
-        description: "Dosage compensation showcases the power of epigenetics in regulating gene expression."
-      },
-      {
-        title: "Evolutionary Marvel",
-        description: "Drosophila's dosage compensation is a testament to evolutionary innovation."
-      },
-      {
-        title: "Genetic Symphony",
-        description: "The coordination between MSL proteins and roX RNAs creates a harmonious gene expression tune."
-      },
-      // Dosage Compensation Across Species
-      {
-        title: "Mammalian Mystery",
-        description: "In female mammals, one X chromosome is silenced to balance gene expression—a process called X-inactivation."
-      },
-      {
-        title: "C. elegans Strategy",
-        description: "Hermaphrodite worms halve the expression from both X chromosomes to match males' single X."
-      },
-      {
-        title: "Birds' Enigma",
-        description: "Birds have ZW sex chromosomes, but their dosage compensation mechanisms are still not fully understood."
-      },
-      {
-        title: "Butterfly Balance",
-        description: "Some butterflies double gene expression on the male's single X chromosome to achieve balance."
-      },
-      {
-        title: "Marsupial Method",
-        description: "In marsupials, the paternal X chromosome is always inactivated in females."
-      },
-      {
-        title: "Fishy Findings",
-        description: "Dosage compensation mechanisms in fish species vary widely and are still being studied."
-      },
-      {
-        title: "Random Acts",
-        description: "In humans, X-inactivation is typically random, but sometimes one X is preferentially inactivated—known as skewed X-inactivation."
-      },
-      {
-        title: "Turner Syndrome Insight",
-        description: "Individuals with Turner syndrome (XO) have only one X chromosome, leading to unique dosage compensation challenges."
-      },
-      {
-        title: "Klinefelter Complexity",
-        description: "Males with Klinefelter syndrome (XXY) have an extra X chromosome, and dosage compensation helps balance gene expression."
-      },
-      {
-        title: "Epigenetic Engineers",
-        description: "Across species, dosage compensation involves epigenetic modifications like DNA methylation and histone changes."
-      },
-      // Long Non-Coding RNAs (lncRNAs)
-      {
-        title: "Not So Junky",
-        description: "Once considered 'junk,' lncRNAs are now recognized as crucial regulators of gene expression."
-      },
-      {
-        title: "Guiding Lights",
-        description: "lncRNAs can guide proteins to specific DNA sites, influencing gene activity."
-      },
-      {
-        title: "Scaffold Builders",
-        description: "They act as scaffolds, bringing together multiple proteins to form functional complexes."
-      },
-      {
-        title: "Signal Senders",
-        description: "lncRNAs can act as molecular signals, turning genes on or off in response to various stimuli."
-      },
-      {
-        title: "Chromatin Remodelers",
-        description: "They play roles in modifying chromatin structure, impacting gene accessibility."
-      },
-      {
-        title: "Transcriptional Tuners",
-        description: "lncRNAs can enhance or repress transcription, fine-tuning gene expression levels."
-      },
-      {
-        title: "RNA Sponges",
-        description: "Some lncRNAs act as sponges, binding to and sequestering microRNAs, preventing them from repressing target mRNAs."
-      },
-      {
-        title: "Cell Fate Deciders",
-        description: "They influence cell differentiation, guiding stem cells to become specific cell types."
-      },
-      {
-        title: "Disease Links",
-        description: "Aberrant lncRNA expression is linked to various diseases, including cancers and neurological disorders."
-      },
-      {
-        title: "Therapeutic Targets",
-        description: "lncRNAs are emerging as potential targets for novel therapeutic interventions."
-      }
+      { title: "X Marks the Spot", description: "Male fruit flies double the activity of their single X chromosome to match females' two—talk about leveling the playing field!" },
+      { title: "MSL Squad Goals", description: "The Male-Specific Lethal (MSL) complex is the ultimate team, boosting gene expression on the male X chromosome." },
+      { title: "roX Stars", description: "roX1 and roX2 RNAs are the dynamic duo guiding the MSL complex to the X chromosome." },
+      { title: "Histone Remix", description: "MSL complex adds acetyl groups to histone H4 at lysine 16, turning up the gene expression volume." },
+      { title: "Sex-Lethal Switch", description: "The Sex-lethal gene ensures females don't form the MSL complex—gender-specific gene regulation at its finest." },
+      { title: "Chromosome Choreography", description: "The MSL complex dances along the X chromosome, ensuring genes are expressed just right." },
+      { title: "Dosage Drama", description: "Without proper dosage compensation, male flies face fatal consequences—balance is life!" },
+      { title: "Epigenetic Elegance", description: "Dosage compensation showcases the power of epigenetics in regulating gene expression." },
+      { title: "Evolutionary Marvel", description: "Drosophila's dosage compensation is a testament to evolutionary innovation." },
+      { title: "Genetic Symphony", description: "The coordination between MSL proteins and roX RNAs creates a harmonious gene expression tune." },
+      { title: "Mammalian Mystery", description: "In female mammals, one X chromosome is silenced to balance gene expression—a process called X-inactivation." },
+      { title: "C. elegans Strategy", description: "Hermaphrodite worms halve the expression from both X chromosomes to match males' single X." },
+      { title: "Birds' Enigma", description: "Birds have ZW sex chromosomes, but their dosage compensation mechanisms are still not fully understood." },
+      { title: "Butterfly Balance", description: "Some butterflies double gene expression on the male's single X chromosome to achieve balance." },
+      { title: "Marsupial Method", description: "In marsupials, the paternal X chromosome is always inactivated in females." },
+      { title: "Fishy Findings", description: "Dosage compensation mechanisms in fish species vary widely and are still being studied." },
+      { title: "Random Acts", description: "In humans, X-inactivation is typically random, but sometimes one X is preferentially inactivated—known as skewed X-inactivation." },
+      { title: "Turner Syndrome Insight", description: "Individuals with Turner syndrome (XO) have only one X chromosome, leading to unique dosage compensation challenges." },
+      { title: "Klinefelter Complexity", description: "Males with Klinefelter syndrome (XXY) have an extra X chromosome, and dosage compensation helps balance gene expression." },
+      { title: "Epigenetic Engineers", description: "Across species, dosage compensation involves epigenetic modifications like DNA methylation and histone changes." },
+      { title: "Not So Junky", description: "Once considered 'junk,' lncRNAs are now recognized as crucial regulators of gene expression." },
+      { title: "Guiding Lights", description: "lncRNAs can guide proteins to specific DNA sites, influencing gene activity." },
+      { title: "Scaffold Builders", description: "They act as scaffolds, bringing together multiple proteins to form functional complexes." },
+      { title: "Signal Senders", description: "lncRNAs can act as molecular signals, turning genes on or off in response to various stimuli." },
+      { title: "Chromatin Remodelers", description: "They play roles in modifying chromatin structure, impacting gene accessibility." },
+      { title: "Transcriptional Tuners", description: "lncRNAs can enhance or repress transcription, fine-tuning gene expression levels." },
+      { title: "RNA Sponges", description: "Some lncRNAs act as sponges, binding to and sequestering microRNAs, preventing them from repressing target mRNAs." },
+      { title: "Cell Fate Deciders", description: "They influence cell differentiation, guiding stem cells to become specific cell types." },
+      { title: "Disease Links", description: "Aberrant lncRNA expression is linked to various diseases, including cancers and neurological disorders." },
+      { title: "Therapeutic Targets", description: "lncRNAs are emerging as potential targets for novel therapeutic interventions." }
     ];
 
-    // Randomly select 10 unique facts for each page load
+    // Randomly select 10 unique facts
     function getRandomFacts(pool, n) {
       const facts = [];
       const used = new Set();
@@ -202,19 +126,29 @@
       }
       return facts;
     }
-    // On each load, select 10
+
+    // Responsive Canvas Setup
+    const canvas = document.getElementById('wheel');
+    function getCanvasSize() {
+      return Math.min(window.innerWidth * 0.9, 400);
+    }
+    function resizeCanvas() {
+      const size = getCanvasSize();
+      canvas.width = size;
+      canvas.height = size;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      drawWheel(currentRotation);
+    });
+
+    // Per page load, pick 10 facts
     const facts = getRandomFacts(factPool, 10);
 
-    const canvas = document.getElementById('wheel');
-    const ctx = canvas.getContext('2d');
-    const numSegments = facts.length;
-    const centerX = 200, centerY = 200, radius = 180;
-    const segAngle = 2 * Math.PI / numSegments;
-    const colors = [];
-
-    // Vibrant, accessible palette: red/orange/yellow/green/blue
+    // Colors: red, orange, yellow, green, blue
     const colorRanges = [
-      [0, 60],     // Red/Orange/Yellow (warm)
+      [0, 60],     // Red/Orange/Yellow
       [80, 150],   // Green
       [180, 240],  // Blue
     ];
@@ -223,14 +157,20 @@
       const hue = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
       return `hsl(${hue}, 90%, 62%)`;
     }
-    for (let i = 0; i < numSegments; i++) {
+    const colors = [];
+    for (let i = 0; i < facts.length; i++) {
       colors.push(generateColor(i));
     }
 
+    // Draw the wheel
     function drawWheel(rotation = 0) {
-      ctx.clearRect(0, 0, 400, 400);
+      const size = canvas.width;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, size, size);
+      const centerX = size / 2, centerY = size / 2, radius = size * 0.45;
+      const numSegments = facts.length;
+      const segAngle = 2 * Math.PI / numSegments;
       for (let i = 0; i < numSegments; i++) {
-        // Pie slice
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
@@ -238,20 +178,21 @@
         ctx.closePath();
         ctx.fillStyle = colors[i];
         ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = Math.max(size*0.008,2);
         ctx.fill();
         ctx.stroke();
 
-        // Draw text radiating outwards, aligned with segment
+        // Draw text
         ctx.translate(centerX, centerY);
         ctx.rotate(rotation + (i + 0.5) * segAngle);
 
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#fff";
-        ctx.font = "bold 14px sans-serif";
+        // Responsive font size
+        ctx.font = `bold ${Math.max(12, Math.floor(size * 0.037))}px sans-serif`;
 
-        // Split title into lines if too long
+        // Split title if too long
         const text = facts[i].title;
         const maxLen = 22;
         let lines = [];
@@ -269,13 +210,11 @@
         } else {
           lines = [text];
         }
-
-        // Draw lines vertically centered along the radius
-        const lineHeight = 15;
+        const lineHeight = Math.max(14, Math.floor(size * 0.037));
         const startY = -((lines.length - 1) / 2) * lineHeight;
         for (let idx = 0; idx < lines.length; idx++) {
           ctx.save();
-          ctx.translate(40, startY + idx * lineHeight); // 40px from center
+          ctx.translate(size * 0.13, startY + idx * lineHeight); // ~13% radius from center
           ctx.rotate(0);
           ctx.fillText(lines[idx], 0, 0);
           ctx.restore();
@@ -293,9 +232,9 @@
       spinning = true;
       document.getElementById('fact').textContent = "";
 
-      // Pick a random segment as the winner
+      const numSegments = facts.length;
+      const segAngle = 2 * Math.PI / numSegments;
       const winner = Math.floor(Math.random() * numSegments);
-      // Spin at least 5 times + land on winner
       const spins = Math.floor(Math.random() * 3) + 5;
       const finalRotation = (spins * 2 * Math.PI) + ((numSegments - winner) * segAngle) - segAngle / 2;
 
@@ -306,7 +245,6 @@
       function animate(now) {
         const elapsed = now - start;
         const t = Math.min(elapsed / duration, 1);
-        // Ease out
         const ease = 1 - Math.pow(1 - t, 3);
         const angle = startRotation + (finalRotation - startRotation) * ease;
         drawWheel(angle);
@@ -315,7 +253,6 @@
         } else {
           currentRotation = finalRotation % (2 * Math.PI);
           spinning = false;
-          // Show full description
           setTimeout(() => {
             document.getElementById('fact').textContent =
               facts[winner].title + ":\n" + facts[winner].description;
@@ -328,6 +265,13 @@
     drawWheel();
 
     document.getElementById('spin').onclick = spinWheel;
+
+    // Optional: support touch on the spin button
+    document.getElementById('spin').addEventListener('touchstart', function(e){
+      e.preventDefault();
+      spinWheel();
+    });
+
   </script>
 </body>
 </html>
