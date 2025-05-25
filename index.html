@@ -11,11 +11,13 @@
       background: #f4f4fa;
     }
     #pointer {
-      width: 0; height: 0;
+      width: 0;
+      height: 0;
       border-left: 16px solid transparent;
-      border-right:16px solid transparent;
+      border-right: 16px solid transparent;
       border-bottom: 32px solid #dc2626;
-      position: relative; top: 6px; left: 0;
+      position: relative;
+      top: 6px;
       margin: auto;
       z-index: 2;
     }
@@ -57,7 +59,6 @@
   <div id="fact"></div>
 
   <script>
-    // Fun facts array (10 facts, one per segment)
     const facts = [
       'roX originally stood for "RNA on X" – catchy, right?',
       'Without roX2, male flies feel X-tra lonely.',
@@ -78,17 +79,21 @@
     const segAngle = 2 * Math.PI / numSegments;
     const colors = [];
 
-    // Generate vibrant, colorblind-friendly, warm colors for each segment
-    function generateWarmColor(i) {
-      // Warm hues: red, orange, yellow (0–60deg), rotate a bit for variety
-      const hue = (i * (60 / numSegments) + Math.random() * 15) % 60;
+    // Vibrant, accessible palette: red/orange/yellow/green/blue
+    const colorRanges = [
+      [0, 60],     // Red/Orange/Yellow (warm)
+      [80, 150],   // Green
+      [180, 240],  // Blue
+    ];
+    function generateColor(i) {
+      const range = colorRanges[i % colorRanges.length];
+      const hue = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
       return `hsl(${hue}, 90%, 62%)`;
     }
     for (let i = 0; i < numSegments; i++) {
-      colors.push(generateWarmColor(i));
+      colors.push(generateColor(i));
     }
 
-    // Draw the wheel
     function drawWheel(rotation = 0) {
       ctx.clearRect(0, 0, 400, 400);
       for (let i = 0; i < numSegments; i++) {
@@ -104,20 +109,18 @@
         ctx.fill();
         ctx.stroke();
 
-        // Draw vertical text
+        // Draw text radiating outwards, aligned with segment
         ctx.translate(centerX, centerY);
         ctx.rotate(rotation + (i + 0.5) * segAngle);
 
-        ctx.save(); // For vertical orientation
-        ctx.rotate(Math.PI / 2);
-        ctx.textAlign = "center";
+        ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#fff";
-        ctx.font = "bold 15px sans-serif";
+        ctx.font = "bold 14px sans-serif";
 
-        // Split the long fact into multiple lines if needed
+        // Split fact into lines if it's too long
         const text = facts[i];
-        const maxLen = 20;
+        const maxLen = 22;
         let lines = [];
         if (text.length > maxLen) {
           let parts = text.split(' ');
@@ -134,14 +137,16 @@
           lines = [text];
         }
 
-        // Draw lines vertically centered
-        const lineHeight = 16;
+        // Draw lines vertically centered along the radius
+        const lineHeight = 15;
         const startY = -((lines.length - 1) / 2) * lineHeight;
         for (let idx = 0; idx < lines.length; idx++) {
-          ctx.fillText(lines[idx], radius / 1.5, startY + idx * lineHeight);
+          ctx.save();
+          ctx.translate(40, startY + idx * lineHeight); // 40px from center
+          ctx.rotate(0); // No extra rotation needed
+          ctx.fillText(lines[idx], 0, 0);
+          ctx.restore();
         }
-        ctx.restore();
-
         ctx.restore();
       }
     }
