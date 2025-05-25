@@ -155,7 +155,7 @@
     function generateColor(i) {
       const range = colorRanges[i % colorRanges.length];
       const hue = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
-      return `hsl(${hue}, 90%, 62%)`;
+      return `hsl(${hue}, 40%, 50%)`;
     }
     const colors = [];
     for (let i = 0; i < facts.length; i++) {
