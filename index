@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spin the roX Fun-Fact Wheel!</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2em; }
+    #wheel { 
+      width: 300px; height: 300px; margin: auto; border: 8px solid #4f46e5; 
+      border-radius: 50%; position: relative; overflow: hidden;
+      transition: transform 3s ease-out;
+    }
+    .segment {
+      position: absolute; width: 50%; height: 50%; top: 50%; left: 50%;
+      transform-origin: 0 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8em; pointer-events: none;
+    }
+    #pointer {
+      width: 0; height: 0; border-left: 12px solid transparent;
+      border-right:12px solid transparent; border-bottom: 24px solid #dc2626;
+      position: relative; top: -12px; margin: auto;
+    }
+    button { margin-top: 1em; padding: 0.5em 1em; background:#4f46e5; color:#fff;
+             border:none; border-radius:9999px; cursor:pointer; }
+    #fact { margin-top:1em; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h1>Spin the roX Fun-Fact Wheel!</h1>
+  <div id="pointer"></div>
+  <div id="wheel"></div>
+  <button id="spin">Spin</button>
+  <div id="fact"></div>
+
+  <script>
+    const facts = [
+      'roX originally stood for "RNA on X" – catchy, right?',
+      'Without roX2, male flies feel X-tra lonely.',
+      'CUT&RUN can sometimes be a bit too cut-throat.',
+      'MSL2 loves ChIP more than CUT&RUN (sometimes).',
+      'Some roX mutants save the day better than others!',
+      'Stay calm and roX on – science rocks!'
+    ];
+    const wheel = document.getElementById('wheel');
+    const factDiv = document.getElementById('fact');
+    const segAngle = 360 / facts.length;
+    let currentRotation = 0;
+
+    // build segments
+    facts.forEach((txt, i) => {
+      const seg = document.createElement('div');
+      seg.className = 'segment';
+      seg.style.transform = `rotate(${i*segAngle}deg) translate(-50%, -100%)`;
+      seg.textContent = txt.slice(0, 15) + '…';
+      wheel.appendChild(seg);
+    });
+
+    document.getElementById('spin').onclick = () => {
+      const spins = Math.floor(Math.random()*5)+5; 
+      const index = Math.floor(Math.random()*facts.length);
+      const target = spins*360 + index*segAngle + segAngle/2;
+      wheel.style.transform = `rotate(${target}deg)`;
+      currentRotation = target;
+      factDiv.textContent = '';
+      setTimeout(() => factDiv.textContent = 'Fun Fact: ' + facts[index], 3000);
+    };
+  </script>
+</body>
+</html>
